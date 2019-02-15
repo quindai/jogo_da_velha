@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Jogo da Velha</title>
+</head>
+<body>
+	<p></p>
+<script type="text/javascript">
+	var tabuleiro = document.createElement('p');
+
+	var auxTab = [[1,1,1],[0,0,1],[1,1,0]];
+	document.body.appendChild(tabuleiro);
+//debugger;
+	escreveTabuleiro();
+
+
+	function escreveTabuleiro(){
+		let i, j;
+		tabuleiro.innerHTML = '';
+		for(i = 0; i<3; ++i){
+			for(j = 0; j<3; ++j){
+				tabuleiro.innerHTML += "  "+ auxTab[i][j] +"   |";
+			}
+			tabuleiro.innerHTML += '<br>';
+			for(j = 0; j<3; ++j){
+				tabuleiro.innerHTML += "---"
+				if (j <= 2) tabuleiro.innerHTML += "|";
+			}
+			tabuleiro.innerHTML += '<br>';
+		}
+	}
+
+	function venceuLinha(marca){
+		let j,i, b=true;
+		//verifica linha ganha
+		for(i=0; i<3; ++i){
+			j=0;
+			b=true;
+			while( j<3 ){
+				//b = true;
+				if(auxTab[i][j++] != marca) b = false;
+				//else b = b || false;
+			}
+		//	debugger;
+			
+			if(b) return tabuleiro.innerHTML += '<br><br>Linha Jogador '+ marca+ ' venceu.'
+		}
+	}
+
+	function venceuColuna(marca){
+		let j,i, b=true;
+		//verifica linha ganha
+		for(i=0; i<3; ++i){
+			j=0;
+			b=true;
+			while( j<3 ){
+				//b = true;
+				if(auxTab[j++][i] != marca) b = false;
+				//else b = b || false;
+			}
+		//	debugger;
+			
+			if(b) return tabuleiro.innerHTML += '<br><br>Coluna Jogador '+ marca+ ' venceu.'
+		}
+	}
+
+	function venceuDiagonalPrincipal(marca){
+		let j,i, b=true;
+		//verifica linha ganha
+		for(i=0; i<3; ++i){
+			//j=0;
+			//b=true;
+			
+				//b = true;
+			if(auxTab[i][i] != marca) b = false;
+				//else b = b || false;
+			
+		//	debugger;
+			}
+			if(b) return tabuleiro.innerHTML += '<br><br>Diagonal Principal Jogador '+ marca+ ' venceu.'
+		
+	}
+
+	function venceuDiagonalSecundaria(marca){
+		let j,i, b=true;
+		//verifica linha ganha
+		for(i=2; i>=0; --i){
+			//j=0;
+			//b=true;
+			//debugger;
+				//b = true;
+			if(auxTab[i][2-i] != marca) b = false;
+				//else b = b || false;
+			
+			//debugger;
+		}	
+			if(b) return tabuleiro.innerHTML += '<br><br>Diagonal Secundaria Jogador '+ marca+ ' venceu.'
+		
+	}
+
+	function venceu(marca){
+		return venceuLinha(marca) + venceuDiagonalSecundaria(marca) + 
+			venceuColuna(marca) + venceuDiagonalPrincipal(marca);
+	}
+
+	function resultado(){
+		if ((venceu(0) || venceu(1)) && (jogoAcabou) ) return tabuleiro.innerHTML += 'Empate.'
+	}
+
+	tabuleiro.addEventListener("click", ()=> {venceu(0)});
+	tabuleiro.addEventListener("click", ()=> {venceu(1)});
+
+</script>
+</body>
+</html>
