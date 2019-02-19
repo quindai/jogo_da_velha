@@ -16,6 +16,7 @@
 </head>
 <body>
 	<p></p>
+	<h5>Randy Quindai<br>Teoria dos Jogos (MiniMax Jogo da Velha (TicTacToe) - 2019<br>Prof. Roberta</h5>
 	<div class="canvas-wrapper">
 		<canvas id="jogo">
 			
@@ -29,6 +30,7 @@
 		var sectionSize = 400 / 3; //canvas size 400x400px
 		var auxTab = [[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]];
 		var tabuleiro = document.createElement('p');
+		var gameStatus = true;
 
 		var canvas = document.getElementById("jogo"); 
 		canvas.width= 400;
@@ -81,19 +83,36 @@ canvas.addEventListener('mousemove', (event)=>{
 		function drawPlayerChoice(mouse){
 			let xCor, yCor;
 
-			for(i = 0; i<3; ++i)
-				for(j = 0; j<3; ++j){
-					xCor = i*sectionSize;
-					yCor = j*sectionSize;
+			if (gameStatus)
+				for(i = 0; i<3; ++i)
+					for(j = 0; j<3; ++j){
+						xCor = i*sectionSize;
+						yCor = j*sectionSize;
 
-					if(mouse.x >= xCor && mouse.x <= xCor+sectionSize && mouse.y >= yCor && mouse.y <= yCor+sectionSize) {
-						clearSection(xCor, yCor);
-						alert("Xcor = "+ xCor + "   YCor = "+ yCor);
-						auxTab[yCor][xCor] = ( player===true ? drawX(xCor, yCor) : draw0(xCor, yCor) );
-						escreveTabuleiro();
-						player = !player;
+						if(mouse.x >= xCor && mouse.x <= xCor+sectionSize && mouse.y >= yCor && mouse.y <= yCor+sectionSize) {
+							if (auxTab[(yCor/133)>>0][(xCor/133)>>0] === -1){
+								clearSection(xCor, yCor);
+								
+							//	alert("Xcor = "+ xCor + "   YCor = "+ yCor);
+								auxTab[(yCor/133)>>0][(xCor/133)>>0] = ( player===true ? drawX(xCor, yCor) : draw0(xCor, yCor) );
+								escreveTabuleiro();
+								player = !player;
+								
+								/*if ( !(venceu(0).status || venceu(1).status) && 
+									!auxTab.some(item => { return item.includes(-1); }) ) {
+									tabuleiro.innerHTML += '<br><br>Empate!'
+									gameStatus = false;
+								}*/
+
+								venceu(0);
+								venceu(1);
+								if (!auxTab.some(item => { return item.includes(-1); }) && gameStatus){
+									gameStatus = false;
+									tabuleiro.innerHTML += "<br><br> Empate!"
+								}
+							}
+						}
 					}
-				}
 		}
 
 		function drawX(xCor, yCor){
@@ -148,6 +167,7 @@ canvas.addEventListener('mousemove', (event)=>{
 	// All rules to control the game
 	
 	document.body.appendChild(tabuleiro);
+	escreveTabuleiro();
 //debugger;
 
 
@@ -168,6 +188,7 @@ function escreveTabuleiro(){
 	}
 }
 
+/** Functions to verify the status o the game ***/
 function venceuLinha(marca){
 	let j,i, b=true;
 		//verifica linha ganha
@@ -180,8 +201,8 @@ function venceuLinha(marca){
 				//else b = b || false;
 			}
 		//	debugger;
-
-		if(b) return tabuleiro.innerHTML += '<br><br>Linha Jogador '+ marca+ ' venceu.'
+		gameStatus = (!gameStatus ? gameStatus : !b);
+		if(b) return tabuleiro.innerHTML += '<br><br>Linha: Jogador '+ marca+ ' venceu.'
 	}
 }
 
@@ -197,8 +218,8 @@ function venceuColuna(marca){
 				//else b = b || false;
 			}
 		//	debugger;
-
-		if(b) return tabuleiro.innerHTML += '<br><br>Coluna Jogador '+ marca+ ' venceu.'
+		gameStatus = (!gameStatus ? gameStatus : !b);
+		if(b) return tabuleiro.innerHTML += '<br><br>Coluna: Jogador '+ marca+ ' venceu.'
 	}
 }
 
@@ -215,7 +236,9 @@ function venceuDiagonalPrincipal(marca){
 
 		//	debugger;
 	}
-	if(b) return tabuleiro.innerHTML += '<br><br>Diagonal Principal Jogador '+ marca+ ' venceu.'
+	gameStatus = (!gameStatus ? gameStatus : !b);
+	if(b) 
+		return tabuleiro.innerHTML += '<br><br>Diagonal Principal: Jogador '+ marca+ ' venceu.'
 		
 }
 
@@ -232,17 +255,14 @@ function venceuDiagonalSecundaria(marca){
 
 			//debugger;
 		}	
-		if(b) return tabuleiro.innerHTML += '<br><br>Diagonal Secundaria Jogador '+ marca+ ' venceu.'
+		gameStatus = (!gameStatus ? gameStatus : !b);
+		if(b) return tabuleiro.innerHTML += '<br><br>Diagonal Secundaria: Jogador '+ marca+ ' venceu.'
 
 	}
 
 function venceu(marca){
 	return venceuLinha(marca) + venceuDiagonalSecundaria(marca) + 
 	venceuColuna(marca) + venceuDiagonalPrincipal(marca);
-}
-
-function resultado(){
-	if ((venceu(0) || venceu(1)) && (jogoAcabou) ) return tabuleiro.innerHTML += 'Empate.'
 }
 
 tabuleiro.addEventListener("click", ()=> {venceu(0)});
