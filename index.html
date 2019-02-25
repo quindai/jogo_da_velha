@@ -15,7 +15,6 @@
 </style>
 </head>
 <body>
-	<p></p>
 	<h5>Randy Quindai<br>Teoria dos Jogos (MiniMax Jogo da Velha (TicTacToe) - 2019<br>Prof. Roberta</h5>
 	<div class="canvas-wrapper">
 		<canvas id="jogo">
@@ -25,6 +24,7 @@
 
 
 	<script type="text/javascript">
+		var move = { x: 0, y:0 }
 		var player = true;  // true : jogador 1;  false : jogador 2
 		var lineColor = "#ddd";
 		var sectionSize = 400 / 3; //canvas size 400x400px
@@ -168,9 +168,17 @@ canvas.addEventListener('mousemove', (event)=>{
 	
 	document.body.appendChild(tabuleiro);
 	escreveTabuleiro();
-//debugger;
 
 
+
+
+
+
+
+function log2(n) 
+{ 
+  return (n==1)? 0 : 1 + log2(n/2); 
+} 
 
 function escreveTabuleiro(){
 	let i, j;
@@ -189,6 +197,80 @@ function escreveTabuleiro(){
 }
 
 /** Functions to verify the status o the game ***/
+// pos = {x:int, y:int}  b = auxTab
+/*function minimax(pos, b, depth, isMax, alpha, beta){
+
+	if (depth == 3) return pos;
+	if(isMax){ //maximize
+		let bestVal = -10000;
+		for( i = 0; i > 3; ++i ) 
+			for (j = 0; j < 3; ++j){
+				value = minimax(b, depth+1, false, alpha, beta);
+				bestVal = Math.max(bestVal, value);
+				alpha = Math.max(alpha, bestVal);
+				if(beta <= alpha) break;
+			}
+		return bestVal;
+		
+	} else{  //minimize
+		bestVal = 10000;
+		for( i = 0; i > 3; ++i ) 
+			for (j = 0; j < 3; ++j){
+				value = minimax(b, depth+1, true, alpha, beta);
+				bestVal = Math.min(bestVal, value);
+				beta = Math.min(beta, bestVal);
+				if (beta <= alpha) break;
+			}
+		return bestVal;
+	}
+}*/
+
+function minimax(board, depth, player){
+	var best = (!player ? [-1,-1,-1000]:[-1,-1,1000]);
+	var score =[];
+
+	if(depth == 0){
+		return [-1,-1,(player?1:-1)];
+	}
+	
+	emptyCells(board).forEach((cell) => {
+		var x = cell[0], y = cell[1];
+		board[x][y] = (player ? 1:0);
+		score = minimax(board, depth-1, !player);
+		board[x][y] = 0; //undo move
+		score[0] = x;
+		score[1] = y;
+
+		if(player) {
+			if(score[2] > best[2])
+				best = score;
+		} else
+			if(score[2] < best[2]) best=score;
+	}); debugger;
+	return best;
+}
+
+
+
+function emptyCells(board) {
+	var cells = [];
+	for (var x = 0; x < 3; x++) {
+		for (var y = 0; y < 3; y++) {
+			if (board[x][y] == -1)
+				cells.push([x, y]);
+		}
+	}
+	return cells;
+}
+
+function matToVector(b){
+	let v = [];
+	for( i = 0; i < 3; ++i ) 
+			for (j = 0; j < 3; ++j)
+				v[i*3 + j] = auxTab[i][j];
+	return v;
+}
+
 function venceuLinha(marca){
 	let j,i, b=true;
 		//verifica linha ganha
