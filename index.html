@@ -24,7 +24,7 @@
 
 
 	<script type="text/javascript">
-		var move = { x: 0, y:0 }
+		//var move = { x: 0, y:0 }
 		var player = true;  // true : jogador 1;  false : jogador 2
 		var lineColor = "#ddd";
 		var sectionSize = 400 / 3; //canvas size 400x400px
@@ -44,6 +44,8 @@
 
 		function drawOn(event){
 			drawPlayerChoice(getMousePosition(event));
+			//aiTurn(auxTab);
+			venceu(0); venceu(1);
 			//alert("Clique no canvas X="+ getMousePosition(event).x + "; Y="+getMousePosition(event).y );
 
 		}
@@ -95,6 +97,7 @@ canvas.addEventListener('mousemove', (event)=>{
 								
 							//	alert("Xcor = "+ xCor + "   YCor = "+ yCor);
 								auxTab[(yCor/133)>>0][(xCor/133)>>0] = ( player===true ? drawX(xCor, yCor) : draw0(xCor, yCor) );
+								
 								escreveTabuleiro();
 								player = !player;
 								
@@ -171,7 +174,154 @@ canvas.addEventListener('mousemove', (event)=>{
 
 
 
+var HUMAN = -1;
+var COMP = +1;
 
+function evalute(state) {
+	var score = 0;
+
+	if (gameOver(state, COMP)) {
+		score = +1;
+	}
+	else if (gameOver(state, HUMAN)) {
+		score = -1;
+	} else {
+		score = 0;
+	}
+
+	return score;
+}
+
+function gameOver(state, player) {
+	var win_state = [
+		[state[0][0], state[0][1], state[0][2]],
+		[state[1][0], state[1][1], state[1][2]],
+		[state[2][0], state[2][1], state[2][2]],
+		[state[0][0], state[1][0], state[2][0]],
+		[state[0][1], state[1][1], state[2][1]],
+		[state[0][2], state[1][2], state[2][2]],
+		[state[0][0], state[1][1], state[2][2]],
+		[state[2][0], state[1][1], state[0][2]],
+	];
+
+	for (var i = 0; i < 8; i++) {
+		var line = win_state[i];
+		var filled = 0;
+		for (var j = 0; j < 3; j++) {
+			if (line[j] == player)
+				filled++;
+		}
+		if (filled == 3)
+			return true;
+	}
+	return false;
+}
+
+function gameOverAll(state) {
+	return gameOver(state, 1) || gameOver(state, 0);
+}
+
+function emptyCells(state) {
+	var cells = [];
+	for (var x = 0; x < 3; x++) {
+		for (var y = 0; y < 3; y++) {
+			if (state[x][y] == -1)
+				cells.push([x, y]);
+		}
+	}
+
+	return cells;
+}
+
+function validMove(x, y) {
+	//var empties = emptyCells(auxTab);
+	try {
+		if (auxTab[x][y] == -1) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	} catch (e) {
+		return false;
+	}
+}
+
+function setMove(x, y, player) {
+	if (validMove(x, y)) {
+		auxTab[x][y] = player;
+		escreveTabuleiro();
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+/*
+function minimax(state, depth, player) {
+	var best;
+
+	if (player == 0) {
+		best = [+1, +1, -1000];
+	}
+	else {
+		best = [-1, -1, +1000];
+	}
+
+	if (depth == 0 || gameOverAll(state)) {
+		var score = evalute(state);
+		return [-1, -1, score];
+	}
+
+	emptyCells(state).forEach(function (cell) {
+		var x = cell[0];
+		var y = cell[1];
+		state[x][y] = player;
+		var score = minimax(state, depth - 1, (player == 0? 1:0));
+		state[x][y] = -1;
+		score[0] = x;
+		score[1] = y;
+
+		if (player == 0) {
+			if (score[2] > best[2])
+				best = score;
+		}
+		else {
+			if (score[2] < best[2])
+				best = score;
+		}
+	});
+
+	return best;
+}
+*/
+function aiTurn(board) {
+	var x, y;
+	let move;
+	var cell;
+	let cellsEmpty = emptyCells(board).length;
+ // debugger;
+	if (cellsEmpty == 9) {
+		x = parseInt(Math.random() * 3);
+		y = parseInt(Math.random() * 3);
+	}
+	else {
+		move = minimax(board, 0);
+		x = move[0];
+		y = move[1];
+	}
+
+//debugger;
+	if (setMove(x, y, 0)) {
+		player = true;
+draw0(y*133.33333333333334,x*133.33333333333334);
+//auxTab[x][y] = 0;
+/*
+		cell = document.getElementById(String(x) + String(y));
+		cell.innerHTML = "O";*/
+	}
+}
 
 
 
@@ -195,6 +345,68 @@ function escreveTabuleiro(){
 		tabuleiro.innerHTML += '<br>';
 	}
 }
+
+function emptyCells(){
+			var cells = [];
+			for(var i = 0; i<3;++i)
+				for(var j = 0; j<3;++j)
+					if (auxTab[i][j] == -1) {
+						cells.push([i,j]);
+					}
+			return cells;
+		}
+
+		function minimax(board, pl){
+			let empties = emptyCells();
+			var moves = []
+
+			if(venceu(1).length){
+				return {score: -10};
+			} else if(venceu(0).length){
+				return {score: 10};
+			} else if(empties.length === 0){
+				return {score: 0};
+			}
+
+//debugger;
+			for(i=0; i<empties.length; ++i){
+				var mov = {};
+				mov.index = board[empties[i][0]][empties[i][1]];
+				board[empties[i][0]][empties[i][1]] = pl;
+
+				if(pl == 0){
+					let result = minimax(board, 1);
+					mov.score = result.score;
+				} else{
+					let result = minimax(board, 0);
+					mov.score = result.score;
+				}
+
+				board[empties[i][0]][empties[i][1]] = mov.index;
+				moves.push(mov);
+			}
+
+			var bestMove;
+			if(pl == 0) {
+				var bestScore = -1000;
+				for(i=0; i< moves.length; ++i){
+					if (moves[i].score > bestScore){
+						bestScore = moves[i].score;
+						bestMove = i;
+					}
+				}
+			} else{
+				var bestScore = 1000;
+				for(i=0; i<moves.length;++i){
+					if(moves[i].score < bestScore){
+						bestScore = moves[i].score;
+						bestMove = i;
+					}
+				}
+			}
+			return moves[bestMove];
+		}
+
 
 /** Functions to verify the status o the game ***/
 // pos = {x:int, y:int}  b = auxTab
@@ -225,7 +437,7 @@ function escreveTabuleiro(){
 	}
 }*/
 
-function minimax(board, depth, player){
+/*function minimax(board, depth, player){
 	var best = (!player ? [-1,-1,-1000]:[-1,-1,1000]);
 	var score =[];
 
@@ -261,7 +473,7 @@ function emptyCells(board) {
 		}
 	}
 	return cells;
-}
+}*/
 
 function matToVector(b){
 	let v = [];
