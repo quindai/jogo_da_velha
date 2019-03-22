@@ -9,11 +9,18 @@
 	<title>Jogo da Velha - Human vs PC(MiniMax)</title>
 	<style type="text/css">
 	.canvas-wrapper{
-    	font-family: Arial, Helvetica, sans-serif;
+		font-family: Arial, Helvetica, sans-serif;
 	}
 	#jogo{
 		display: block;
 		float: left;
+	}
+	#ganhos{
+		display: block;
+		float: right;
+		height: 100px;
+		width: 220px;
+		overflow-y: scroll;
 	}
 	#status{
 		display: none;
@@ -38,10 +45,10 @@
 		font-size: 30px;
 	}
 	#mstatus{
-		 color: rgba(0,0,0,0.6);
-text-shadow: 2px 8px 6px rgba(0,0,0,0.2),
-                 0px -5px 35px rgba(255,255,255,0.3);
-    	font-size: 40px;
+		color: rgba(0,0,0,0.6);
+		text-shadow: 2px 8px 6px rgba(0,0,0,0.2),
+		0px -5px 35px rgba(255,255,255,0.3);
+		font-size: 40px;
 	}
 </style>
 </head>
@@ -55,7 +62,9 @@ text-shadow: 2px 8px 6px rgba(0,0,0,0.2),
 		</div>
 		<canvas id="jogo"></canvas>
 	</div>
-	
+	<div id="ganhos">
+		
+	</div>
 	
 	<script>
 
@@ -69,6 +78,7 @@ var sectionSize = 400 / 3; //canvas size 400x400px
 var playerH = true;
 var gameStatus = true;
 var tabuleiro = document.createElement('p');
+var mganhos = document.createElement('p');
 var iter = 0;
 var round = 0;
 var aiCo = "white";
@@ -87,6 +97,7 @@ canvas.addEventListener('touchleave', (event)=>{ drawOn(event);	});
 	//call function drawBoard
 	drawBoard(canvas.ctx, 4, lineColor);
 	document.body.appendChild(tabuleiro);
+	document.getElementById("ganhos").appendChild(mganhos);
 
 //****** Board drawing
 
@@ -285,13 +296,14 @@ function drawBoard(ctx, lwidth, strokeStyle){
 		}
 
 		function aiTurn(b){
-
-			let pos = posVectorToPosMat( minimax(board, "O").index );  
+			let mymoves = minimax(board, "O");
+			let pos = posVectorToPosMat( mymoves.index );  
 			let x = pos.j*133.33333333333334, y = pos.i*133.33333333333334;
 	//debugger;
 	auxTab[pos.i][pos.j] =  draw0(x, y) ;
 	board = matToVector(b);
 	playerH = !playerH;
+	mganhos.innerHTML += JSON.stringify(mymoves) +'<br>';
 	//draw0(, );
 }
 
@@ -365,6 +377,7 @@ function matToVector(b){
 					}
 				}
 			}
+			console.log(moves[bestMove]);
 			return moves[bestMove];
 		}
 
